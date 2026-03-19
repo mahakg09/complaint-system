@@ -52,6 +52,17 @@ def get_supabase():
     return _supabase_client
 
 
+def supabase_ready():
+    if not supabase_enabled():
+        return False
+
+    try:
+        get_supabase().table("admins").select("id").limit(1).execute()
+        return True
+    except Exception:
+        return False
+
+
 def get_db():
     db = sqlite3.connect(app.config["DATABASE_PATH"])
     db.row_factory = sqlite3.Row
@@ -83,11 +94,14 @@ def build_image_url(image_value):
     if str(image_value).startswith("http://") or str(image_value).startswith("https://"):
         return image_value
 
-    if supabase_enabled():
-        public_url = get_supabase().storage.from_(SUPABASE_BUCKET).get_public_url(image_value)
-        if isinstance(public_url, dict):
-            return public_url.get("publicUrl") or public_url.get("public_url")
-        return public_url
+    if supabase_ready():
+        try:
+            public_url = get_supabase().storage.from_(SUPABASE_BUCKET).get_public_url(image_value)
+            if isinstance(public_url, dict):
+                return public_url.get("publicUrl") or public_url.get("public_url")
+            return public_url
+        except Exception:
+            return None
 
     return url_for("uploaded_file", filename=image_value)
 
@@ -106,7 +120,7 @@ def normalize_complaint(row, users_map=None):
 
 
 def fetch_all_users_map():
-    if supabase_enabled():
+    if supabase_ready():
         response = get_supabase().table("users").select("id, name, email").execute()
         rows = response.data or []
     else:
@@ -118,7 +132,7 @@ def fetch_all_users_map():
 
 
 def get_user_by_email(email):
-    if supabase_enabled():
+    if supabase_ready():
         response = get_supabase().table("users").select("*").eq("email", email).limit(1).execute()
         rows = response.data or []
         return rows[0] if rows else None
@@ -130,7 +144,7 @@ def get_user_by_email(email):
 
 
 def get_user_by_credentials(email, password):
-    if supabase_enabled():
+    if supabase_ready():
         response = (
             get_supabase()
             .table("users")
@@ -153,7 +167,7 @@ def get_user_by_credentials(email, password):
 
 
 def get_admin_by_credentials(email, password):
-    if supabase_enabled():
+    if supabase_ready():
         response = (
             get_supabase()
             .table("admins")
@@ -176,7 +190,7 @@ def get_admin_by_credentials(email, password):
 
 
 def create_user_record(name, email, password):
-    if supabase_enabled():
+    if supabase_ready():
         get_supabase().table("users").insert(
             {"name": name, "email": email, "password": password}
         ).execute()
@@ -192,7 +206,7 @@ def create_user_record(name, email, password):
 
 
 def fetch_complaints_for_user(user_id):
-    if supabase_enabled():
+    if supabase_ready():
         response = (
             get_supabase()
             .table("complaints")
@@ -224,7 +238,7 @@ def fetch_complaints_for_user(user_id):
 def fetch_all_complaints(category_filter="All"):
     users_map = fetch_all_users_map()
 
-    if supabase_enabled():
+    if supabase_ready():
         query = get_supabase().table("complaints").select("*").order("id", desc=True)
         if category_filter != "All":
             query = query.eq("category", category_filter)
@@ -294,7 +308,7 @@ def save_uploaded_image(image):
     extension = filename.rsplit(".", 1)[1].lower()
     image_name = f"{uuid.uuid4().hex}.{extension}"
 
-    if supabase_enabled():
+    if supabase_ready():
         storage_path = f"complaints/{image_name}"
         image.stream.seek(0)
         get_supabase().storage.from_(SUPABASE_BUCKET).upload(
@@ -315,7 +329,7 @@ def save_uploaded_image(image):
 def create_complaint_record(user_id, title, description, category, location, image_name):
     created_at = datetime.now(timezone.utc).isoformat()
 
-    if supabase_enabled():
+    if supabase_ready():
         get_supabase().table("complaints").insert(
             {
                 "user_id": user_id,
@@ -343,7 +357,7 @@ def create_complaint_record(user_id, title, description, category, location, ima
 
 
 def update_complaint_status(complaint_id, status):
-    if supabase_enabled():
+    if supabase_ready():
         get_supabase().table("complaints").update({"status": status}).eq("id", complaint_id).execute()
         return
 
@@ -591,7 +605,7 @@ def admin_update_status(complaint_id):
 
 
 def initialize_storage():
-    if supabase_enabled():
+    if supabase_ready():
         ensure_supabase_admin()
     else:
         ensure_local_database()
