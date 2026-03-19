@@ -31,8 +31,8 @@
 <section class="cards-grid">
     {% for c in complaints %}
         <article class="complaint-card">
-            {% if c["image"] %}
-                <img src="{{ url_for('uploaded_file', filename=c['image']) }}" alt="{{ c['title'] }}" class="complaint-image">
+            {% if c["image_url"] %}
+                <img src="{{ c['image_url'] }}" alt="{{ c['title'] }}" class="complaint-image">
             {% else %}
                 <div class="complaint-image placeholder">No image uploaded</div>
             {% endif %}

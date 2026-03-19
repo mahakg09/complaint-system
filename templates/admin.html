@@ -81,8 +81,8 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if c["image"] %}
-                            <img src="{{ url_for('uploaded_file', filename=c['image']) }}" alt="{{ c['title'] }}" class="admin-thumb">
+                        {% if c["image_url"] %}
+                            <img src="{{ c['image_url'] }}" alt="{{ c['title'] }}" class="admin-thumb">
                         {% else %}
                             <span class="muted-text">No photo</span>
                         {% endif %}
