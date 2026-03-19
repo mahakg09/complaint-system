@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CivicTrack{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <a href="/" class="brand">
+                <span class="brand-mark" aria-hidden="true">
+                    <span class="brand-mark-dot"></span>
+                </span>
+                <span class="brand-text">CivicTrack</span>
+            </a>
+            <nav class="nav-links">
+                <a href="/">Home</a>
+                {% if session.get("role") == "user" %}
+                    <a href="/dashboard">My Complaints</a>
+                    <a href="/add">Report Issue</a>
+                    <span class="user-pill">{{ session.get("user_name") }}</span>
+                    <a href="/logout">Logout</a>
+                {% elif session.get("role") == "admin" %}
+                    <a href="/admin">Admin Dashboard</a>
+                    <span class="user-pill">{{ session.get("admin_name") }}</span>
+                    <a href="/logout">Logout</a>
+                {% else %}
+                    <a href="/login">User Login</a>
+                    <a href="/admin/login">Admin Login</a>
+                    <a href="/register">Register</a>
+                {% endif %}
+            </nav>
+        </header>
+        <main class="page-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

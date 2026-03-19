@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}User Login | CivicTrack{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-panel">
+        <span class="eyebrow">User Access</span>
+        <h1>Citizen login for complaint reporting and tracking.</h1>
+        <p>Sign in to submit new issues, upload supporting photos, add location details, and follow status updates in your personal dashboard.</p>
+    </div>
+
+    <div class="form-shell">
+        <h2>User Login</h2>
+        {% if error %}
+            <div class="alert">{{ error }}</div>
+        {% endif %}
+        <form method="post" class="stack-form">
+            <label>Email address</label>
+            <input type="email" name="email" placeholder="resident@email.com" required>
+
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter your password" required>
+
+            <button class="btn btn-primary" type="submit">Login as User</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

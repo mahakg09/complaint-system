@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Complaint | CivicTrack{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <div class="page-heading">
+        <span class="eyebrow">Submit Complaint</span>
+        <h1>Report a public issue with photo and location.</h1>
+        <p>Choose a category, describe the issue clearly, attach an image if available, and add the location to help the complaint reach the right team.</p>
+    </div>
+
+    <div class="form-shell large">
+        {% if error %}
+            <div class="alert">{{ error }}</div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data" class="stack-form">
+            <label>Complaint title</label>
+            <input name="title" placeholder="Overflowing garbage near central bus stop" required>
+
+            <label>Description</label>
+            <textarea name="description" rows="5" placeholder="Explain the issue, how long it has been happening, and why it needs attention." required></textarea>
+
+            <label>Category</label>
+            <select name="category" required>
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Location</label>
+            <div class="location-row">
+                <input id="location" name="location" placeholder="Latitude, Longitude or area name" required>
+                <button class="btn btn-secondary" type="button" id="location-btn">Use Current Location</button>
+            </div>
+            <p class="helper-text">Use your current location for quick autofill or type an address manually.</p>
+
+            <label>Upload image</label>
+            <div class="upload-box">
+                <input type="file" name="image" id="image" accept=".png,.jpg,.jpeg,.gif,.webp">
+                <p class="helper-text">Optional photo evidence can help staff verify the issue faster.</p>
+                <img id="image-preview" class="image-preview hidden" alt="Complaint photo preview">
+            </div>
+
+            <button class="btn btn-primary" type="submit">Submit Complaint</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const imageInput = document.getElementById("image");
+    const preview = document.getElementById("image-preview");
+    const locationInput = document.getElementById("location");
+    const locationButton = document.getElementById("location-btn");
+
+    if (imageInput && preview) {
+        imageInput.addEventListener("change", (event) => {
+            const [file] = event.target.files;
+            if (!file) {
+                preview.classList.add("hidden");
+                preview.removeAttribute("src");
+                return;
+            }
+
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove("hidden");
+        });
+    }
+
+    if (locationButton && locationInput && navigator.geolocation) {
+        locationButton.addEventListener("click", () => {
+            locationButton.disabled = true;
+            locationButton.textContent = "Fetching...";
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+                    locationButton.disabled = false;
+                    locationButton.textContent = "Use Current Location";
+                },
+                () => {
+                    locationButton.disabled = false;
+                    locationButton.textContent = "Location Unavailable";
+                }
+            );
+        });
+    }
+</script>
+{% endblock %}

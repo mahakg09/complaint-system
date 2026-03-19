@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}My Complaints | CivicTrack{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <span class="eyebrow">User Dashboard</span>
+    <h1>Track your complaints and their latest status.</h1>
+    <p>Your submitted complaints appear here with category, location, proof image, submission time, and current progress.</p>
+</section>
+
+<section class="stats-grid dashboard-stats stats-grid-four">
+    <div class="stat-card">
+        <span>Total Complaints</span>
+        <strong>{{ summary.total }}</strong>
+    </div>
+    <div class="stat-card">
+        <span>Pending</span>
+        <strong>{{ summary.pending }}</strong>
+    </div>
+    <div class="stat-card">
+        <span>In Progress</span>
+        <strong>{{ summary.in_progress }}</strong>
+    </div>
+    <div class="stat-card">
+        <span>Resolved</span>
+        <strong>{{ summary.resolved }}</strong>
+    </div>
+</section>
+
+<section class="cards-grid">
+    {% for c in complaints %}
+        <article class="complaint-card">
+            {% if c["image"] %}
+                <img src="{{ url_for('uploaded_file', filename=c['image']) }}" alt="{{ c['title'] }}" class="complaint-image">
+            {% else %}
+                <div class="complaint-image placeholder">No image uploaded</div>
+            {% endif %}
+            <div class="complaint-body">
+                <div class="card-meta">
+                    <span class="category-pill">{{ c["category"] }}</span>
+                    <span class="status-pill {{ 'status-pending' if c['status'] == 'Pending' else 'status-progress' if c['status'] == 'In Progress' else 'status-resolved' }}">{{ c["status"] }}</span>
+                </div>
+                <h3>{{ c["title"] }}</h3>
+                <p>{{ c["description"] }}</p>
+                <div class="detail-list">
+                    <span><strong>Location:</strong> {{ c["location"] }}</span>
+                    <span><strong>Submitted:</strong> {{ c["created_at"] or "Recently" }}</span>
+                </div>
+                <a class="map-link" href="https://www.google.com/maps/search/?api=1&query={{ c['location'] | replace(' ', '+') }}" target="_blank" rel="noreferrer">Open location in Google Maps</a>
+            </div>
+        </article>
+    {% else %}
+        <div class="empty-state">
+            <h3>No complaints submitted yet</h3>
+            <p>Create your first complaint with a category, photo, and location details.</p>
+            <a class="btn btn-primary" href="/add">Submit Complaint</a>
+        </div>
+    {% endfor %}
+</section>
+{% endblock %}

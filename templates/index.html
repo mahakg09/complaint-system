@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}CivicTrack | Public Complaint Portal{% endblock %}
+
+{% block content %}
+<section class="hero hero-large">
+    <div class="hero-copy">
+        <span class="eyebrow">Public Complaint Portal</span>
+        <h1>Report civic problems, add photos and location, and track action transparently.</h1>
+        <p class="hero-text">
+            Submit complaints for roads, garbage, water, and electricity services, attach supporting photos, and follow updates from review to resolution.
+        </p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="/register">Get Started as User</a>
+            <a class="btn btn-secondary" href="/admin/login">Admin Login</a>
+        </div>
+    </div>
+    <div class="hero-panel">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span>Total Complaints</span>
+                <strong>{{ summary.total }}</strong>
+            </div>
+            <div class="stat-card">
+                <span>Pending</span>
+                <strong>{{ summary.pending }}</strong>
+            </div>
+            <div class="stat-card">
+                <span>In Progress</span>
+                <strong>{{ summary.in_progress }}</strong>
+            </div>
+            <div class="stat-card">
+                <span>Resolved</span>
+                <strong>{{ summary.resolved }}</strong>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

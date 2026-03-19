@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | CivicTrack{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <span class="eyebrow">Admin Dashboard</span>
+    <h1>Manage complaints across categories and service areas.</h1>
+    <p>Filter complaints, update progress, inspect uploaded images, and review current activity in one place.</p>
+</section>
+
+<section class="stats-grid dashboard-stats stats-grid-four">
+    <div class="stat-card">
+        <span>Total Complaints</span>
+        <strong>{{ summary.total }}</strong>
+    </div>
+    <div class="stat-card">
+        <span>Pending</span>
+        <strong>{{ summary.pending }}</strong>
+    </div>
+    <div class="stat-card">
+        <span>In Progress</span>
+        <strong>{{ summary.in_progress }}</strong>
+    </div>
+    <div class="stat-card">
+        <span>Resolved</span>
+        <strong>{{ summary.resolved }}</strong>
+    </div>
+</section>
+
+<section class="feature-grid charts-grid">
+    <div class="feature-card chart-card">
+        <div class="chart-head">
+            <h3>Complaints by Category</h3>
+            <form method="get" class="filter-form">
+                <select name="category" onchange="this.form.submit()">
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if category == active_category %}selected{% endif %}>{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <canvas id="categoryChart"></canvas>
+    </div>
+    <div class="feature-card chart-card">
+        <h3>Status Distribution</h3>
+        <canvas id="statusChart"></canvas>
+    </div>
+</section>
+
+<section class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Resident</th>
+                <th>Complaint</th>
+                <th>Location</th>
+                <th>Photo</th>
+                <th>Status</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in complaints %}
+                <tr>
+                    <td>#{{ c["id"] }}</td>
+                    <td>
+                        <strong>{{ c["resident_name"] or "Unknown User" }}</strong>
+                        <p>{{ c["resident_email"] or "No email" }}</p>
+                    </td>
+                    <td>
+                        <strong>{{ c["title"] }}</strong>
+                        <p>{{ c["description"] }}</p>
+                        <span class="category-pill">{{ c["category"] }}</span>
+                    </td>
+                    <td>
+                        <span>{{ c["location"] or "No location" }}</span>
+                        {% if c["location"] %}
+                            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query={{ c['location'] | replace(' ', '+') }}" target="_blank" rel="noreferrer">View map</a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if c["image"] %}
+                            <img src="{{ url_for('uploaded_file', filename=c['image']) }}" alt="{{ c['title'] }}" class="admin-thumb">
+                        {% else %}
+                            <span class="muted-text">No photo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="status-pill {{ 'status-pending' if c['status'] == 'Pending' else 'status-progress' if c['status'] == 'In Progress' else 'status-resolved' }}">{{ c["status"] }}</span>
+                        <div class="muted-text space-top">{{ c["created_at"] or "No timestamp" }}</div>
+                    </td>
+                    <td>
+                        <form method="post" action="/admin/update/{{ c['id'] }}?category={{ active_category }}" class="status-form">
+                            <select name="status">
+                                {% for status in status_options %}
+                                    <option value="{{ status }}" {% if status == c["status"] %}selected{% endif %}>{{ status }}</option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-secondary btn-small" type="submit">Save</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="empty-table">No complaints available for this category.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const categoryLabels = {{ chart_data.category_labels | tojson }};
+    const categoryValues = {{ chart_data.category_values | tojson }};
+    const statusLabels = {{ chart_data.status_labels | tojson }};
+    const statusValues = {{ chart_data.status_values | tojson }};
+
+    const categoryCtx = document.getElementById("categoryChart");
+    const statusCtx = document.getElementById("statusChart");
+
+    if (categoryCtx) {
+        new Chart(categoryCtx, {
+            type: "bar",
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    label: "Complaints",
+                    data: categoryValues,
+                    backgroundColor: ["#0e7490", "#e2954d", "#1f8f63", "#d97706"]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: "doughnut",
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusValues,
+                    backgroundColor: ["#d97706", "#2563eb", "#1f8f63"]
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    }
+</script>
+{% endblock %}

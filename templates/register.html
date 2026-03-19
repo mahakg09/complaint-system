@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Register | CivicTrack{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-panel">
+        <span class="eyebrow">Create Account</span>
+        <h1>Register as a resident and start reporting issues.</h1>
+        <p>Create a user account to file complaints about roads, garbage, water, and electricity, then track each complaint from submission to resolution.</p>
+    </div>
+
+    <div class="form-shell">
+        <h2>User Registration</h2>
+        {% if error %}
+            <div class="alert">{{ error }}</div>
+        {% endif %}
+        <form method="post" class="stack-form">
+            <label>Full name</label>
+            <input name="name" placeholder="Enter your full name" required>
+
+            <label>Email address</label>
+            <input type="email" name="email" placeholder="resident@email.com" required>
+
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Create a password" required>
+
+            <button class="btn btn-primary" type="submit">Create User Account</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

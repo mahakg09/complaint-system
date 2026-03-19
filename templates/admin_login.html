@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login | CivicTrack{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-panel">
+        <span class="eyebrow">Admin Access</span>
+        <h1>Administrative access for complaint management.</h1>
+        <p>Use the admin portal to review complaints, filter by category, update status, and monitor overall activity.</p>
+    </div>
+
+    <div class="form-shell">
+        <h2>Admin Login</h2>
+        {% if error %}
+            <div class="alert">{{ error }}</div>
+        {% endif %}
+        <form method="post" class="stack-form">
+            <label>Admin email</label>
+            <input type="email" name="email" placeholder="admin@civictrack.local" required>
+
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter admin password" required>
+
+            <button class="btn btn-primary" type="submit">Login as Admin</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
