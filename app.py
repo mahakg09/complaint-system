@@ -19,9 +19,12 @@ IS_VERCEL = os.environ.get("VERCEL") == "1"
 DATA_DIR = os.environ.get("DATA_DIR") or ("/tmp" if IS_VERCEL else BASE_DIR)
 UPLOAD_FOLDER = os.path.join(DATA_DIR, "uploads")
 DATABASE_PATH = os.environ.get("DATABASE_PATH") or os.path.join(DATA_DIR, "database.db")
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_KEY")
-SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "complaint-images")
+SUPABASE_URL = (os.environ.get("SUPABASE_URL") or "").strip() or None
+SUPABASE_KEY = (
+    (os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_KEY") or "").strip()
+    or None
+)
+SUPABASE_BUCKET = (os.environ.get("SUPABASE_BUCKET") or "complaint-images").strip()
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 STATUS_OPTIONS = ["Pending", "In Progress", "Resolved"]
