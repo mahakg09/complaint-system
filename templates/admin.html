@@ -93,8 +93,8 @@
                         <span class="status-pill {{ 'status-pending' if c['status'] == 'Pending' else 'status-progress' if c['status'] == 'In Progress' else 'status-resolved' }}">{{ c["status"] }}</span>
                         <div class="muted-text space-top">{{ c["created_at"] or "No timestamp" }}</div>
                     </td>
-                    <td>
-                        <form method="post" action="/admin/update/{{ c['id'] }}?category={{ active_category }}" class="status-form">
+                    <td class="update-cell">
+                        <form method="post" action="/admin/update/{{ c['id'] }}?category={{ active_category }}" class="status-form admin-update-form">
                             <select name="status">
                                 {% for status in status_options %}
                                     <option value="{{ status }}" {% if status == c["status"] %}selected{% endif %}>{{ status }}</option>

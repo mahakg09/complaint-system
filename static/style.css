@@ -421,9 +421,16 @@ p {
 .card-meta,
 .chart-head,
 .location-row,
-.status-form,
 .filter-form,
 .footer-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.status-form {
     display: flex;
     justify-content: space-between;
     gap: 12px;
@@ -603,6 +610,26 @@ textarea {
     color: var(--primary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+}
+
+.update-cell {
+    width: 190px;
+    min-width: 190px;
+}
+
+.admin-update-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.admin-update-form select {
+    min-width: 160px;
+    width: 100%;
+}
+
+.admin-update-form .btn {
+    width: 100%;
 }
 
 .admin-thumb {
