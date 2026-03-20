@@ -6,17 +6,21 @@
     <title>{% block title %}CivicTrack{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <div class="gov-strip">Government Complaint Redressal Portal</div>
     <div class="page-shell">
         <header class="topbar">
             <a href="/" class="brand">
                 <span class="brand-mark" aria-hidden="true">
                     <span class="brand-mark-dot"></span>
                 </span>
-                <span class="brand-text">CivicTrack</span>
+                <span class="brand-copy">
+                    <span class="brand-text">CivicTrack</span>
+                    <span class="brand-subtitle">Department of Public Grievances and Civic Services</span>
+                </span>
             </a>
             <nav class="nav-links">
                 <a href="/">Home</a>
@@ -39,6 +43,16 @@
         <main class="page-content">
             {% block content %}{% endblock %}
         </main>
+        <footer class="site-footer">
+            <div>
+                <strong>Public Service Complaint Portal</strong>
+                <p>For reporting civic issues related to roads, sanitation, water supply, and electricity services.</p>
+            </div>
+            <div class="footer-meta">
+                <span>Office Hours: Mon to Fri, 9:00 AM to 5:00 PM</span>
+                <span>Citizen Helpline: 1800-000-111</span>
+            </div>
+        </footer>
     </div>
     {% block scripts %}{% endblock %}
 </body>
