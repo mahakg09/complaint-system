@@ -82,7 +82,9 @@
                     </td>
                     <td>
                         {% if c["image_url"] %}
-                            <img src="{{ c['image_url'] }}" alt="{{ c['title'] }}" class="admin-thumb">
+                            <a href="{{ c['image_url'] }}" target="_blank" rel="noreferrer" class="admin-photo-link">
+                                <img src="{{ c['image_url'] }}" alt="{{ c['title'] }}" class="admin-thumb">
+                            </a>
                         {% else %}
                             <span class="muted-text">No photo</span>
                         {% endif %}

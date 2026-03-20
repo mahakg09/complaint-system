@@ -505,6 +505,8 @@ def admin_login():
 
     if session.get("role") == "admin":
         return redirect(url_for("admin"))
+    if session.get("role") == "user":
+        return redirect(url_for("dashboard"))
 
     if request.method == "POST":
         email = request.form["email"].strip().lower()
