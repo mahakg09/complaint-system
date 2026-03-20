@@ -452,6 +452,10 @@ def uploaded_file(filename):
 
 @app.route("/")
 def index():
+    if session.get("role") == "user":
+        return redirect(url_for("dashboard"))
+    if session.get("role") == "admin":
+        return redirect(url_for("admin"))
     return render_template("index.html", summary=get_site_summary())
 
 
