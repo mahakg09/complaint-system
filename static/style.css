@@ -147,6 +147,12 @@ strong {
     border-color: var(--line);
 }
 
+.nav-links a.nav-active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
 .user-pill {
     background: var(--secondary);
     border-color: var(--line);
