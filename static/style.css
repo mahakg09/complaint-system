@@ -430,6 +430,14 @@ p {
     flex-wrap: wrap;
 }
 
+.filter-form {
+    justify-content: flex-end;
+}
+
+.filter-form select {
+    min-width: 170px;
+}
+
 .status-form {
     display: flex;
     justify-content: space-between;

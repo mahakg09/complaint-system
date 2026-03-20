@@ -268,24 +268,35 @@ def get_complaint_by_id(complaint_id):
     return normalize_complaint(dict(row), users_map) if row else None
 
 
-def fetch_all_complaints(category_filter="All"):
+def fetch_all_complaints(category_filter="All", status_filter="All"):
     users_map = fetch_all_users_map()
 
     if supabase_ready():
         query = get_supabase().table("complaints").select("*").order("id", desc=True)
         if category_filter != "All":
             query = query.eq("category", category_filter)
+        if status_filter != "All":
+            query = query.eq("status", status_filter)
         rows = query.execute().data or []
         return [normalize_complaint(row, users_map) for row in rows]
 
     db = get_db()
+    query = "SELECT * FROM complaints"
+    conditions = []
+    params = []
+
     if category_filter != "All":
-        fetched = db.execute(
-            "SELECT * FROM complaints WHERE category = ? ORDER BY id DESC",
-            (category_filter,),
-        ).fetchall()
-    else:
-        fetched = db.execute("SELECT * FROM complaints ORDER BY id DESC").fetchall()
+        conditions.append("category = ?")
+        params.append(category_filter)
+    if status_filter != "All":
+        conditions.append("status = ?")
+        params.append(status_filter)
+
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+
+    query += " ORDER BY id DESC"
+    fetched = db.execute(query, tuple(params)).fetchall()
     db.close()
     return [normalize_complaint(dict(row), users_map) for row in fetched]
 
@@ -650,13 +661,16 @@ def admin():
         return redirect(url_for("admin_login"))
 
     category_filter = request.args.get("category", "All")
-    complaints = fetch_all_complaints(category_filter)
+    status_filter = request.args.get("status", "All")
+    complaints = fetch_all_complaints(category_filter, status_filter)
     return render_template(
         "admin.html",
         complaints=complaints,
         summary=get_site_summary(),
         categories=["All"] + CATEGORY_OPTIONS,
         active_category=category_filter,
+        statuses=["All"] + STATUS_OPTIONS,
+        active_status=status_filter,
         chart_data=get_admin_chart_data(),
         status_options=STATUS_OPTIONS,
     )
@@ -682,7 +696,13 @@ def admin_update_status(complaint_id):
         except Exception:
             pass
 
-    return redirect(url_for("admin", category=request.args.get("category", "All")))
+    return redirect(
+        url_for(
+            "admin",
+            category=request.args.get("category", "All"),
+            status=request.args.get("status", "All"),
+        )
+    )
 
 
 def initialize_storage():

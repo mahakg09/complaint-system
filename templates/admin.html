@@ -33,11 +33,17 @@
         <div class="chart-head">
             <h3>Complaints by Category</h3>
             <form method="get" class="filter-form">
-                <select name="category" onchange="this.form.submit()">
+                <select name="category">
                     {% for category in categories %}
                         <option value="{{ category }}" {% if category == active_category %}selected{% endif %}>{{ category }}</option>
                     {% endfor %}
                 </select>
+                <select name="status">
+                    {% for status in statuses %}
+                        <option value="{{ status }}" {% if status == active_status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-secondary btn-small" type="submit">Apply Filters</button>
             </form>
         </div>
         <canvas id="categoryChart"></canvas>
@@ -94,7 +100,7 @@
                         <div class="muted-text space-top">{{ c["created_at"] or "No timestamp" }}</div>
                     </td>
                     <td class="update-cell">
-                        <form method="post" action="/admin/update/{{ c['id'] }}?category={{ active_category }}" class="status-form admin-update-form">
+                        <form method="post" action="/admin/update/{{ c['id'] }}?category={{ active_category }}&status={{ active_status }}" class="status-form admin-update-form">
                             <select name="status">
                                 {% for status in status_options %}
                                     <option value="{{ status }}" {% if status == c["status"] %}selected{% endif %}>{{ status }}</option>
@@ -106,7 +112,7 @@
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="7" class="empty-table">No complaints available for this category.</td>
+                    <td colspan="7" class="empty-table">No complaints available for the selected filters.</td>
                 </tr>
             {% endfor %}
         </tbody>
