@@ -1,7 +1,10 @@
 from datetime import datetime, timezone
 from flask import Flask, render_template, request, redirect, session, url_for, send_from_directory
+from email.message import EmailMessage
 import os
 import sqlite3
+import smtplib
+import ssl
 import uuid
 from werkzeug.utils import secure_filename
 
@@ -25,6 +28,12 @@ SUPABASE_KEY = (
     or None
 )
 SUPABASE_BUCKET = (os.environ.get("SUPABASE_BUCKET") or "complaint-images").strip()
+SMTP_HOST = (os.environ.get("SMTP_HOST") or "").strip()
+SMTP_PORT = int((os.environ.get("SMTP_PORT") or "587").strip())
+SMTP_USER = (os.environ.get("SMTP_USER") or "").strip()
+SMTP_PASSWORD = (os.environ.get("SMTP_PASSWORD") or "").strip()
+SMTP_FROM_EMAIL = (os.environ.get("SMTP_FROM_EMAIL") or SMTP_USER or "").strip()
+SMTP_FROM_NAME = (os.environ.get("SMTP_FROM_NAME") or "CivicTrack Notifications").strip()
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 STATUS_OPTIONS = ["Pending", "In Progress", "Resolved"]
@@ -238,6 +247,27 @@ def fetch_complaints_for_user(user_id):
     return rows
 
 
+def get_complaint_by_id(complaint_id):
+    users_map = fetch_all_users_map()
+
+    if supabase_ready():
+        response = (
+            get_supabase()
+            .table("complaints")
+            .select("*")
+            .eq("id", complaint_id)
+            .limit(1)
+            .execute()
+        )
+        rows = response.data or []
+        return normalize_complaint(rows[0], users_map) if rows else None
+
+    db = get_db()
+    row = db.execute("SELECT * FROM complaints WHERE id = ?", (complaint_id,)).fetchone()
+    db.close()
+    return normalize_complaint(dict(row), users_map) if row else None
+
+
 def fetch_all_complaints(category_filter="All"):
     users_map = fetch_all_users_map()
 
@@ -368,6 +398,42 @@ def update_complaint_status(complaint_id, status):
     db.execute("UPDATE complaints SET status = ? WHERE id = ?", (status, complaint_id))
     db.commit()
     db.close()
+
+
+def email_configured():
+    return bool(SMTP_HOST and SMTP_PORT and SMTP_USER and SMTP_PASSWORD and SMTP_FROM_EMAIL)
+
+
+def send_status_email(complaint, new_status):
+    if not complaint or not complaint.get("resident_email") or not email_configured():
+        return False
+
+    subject = f"Complaint Status Update - {complaint['title']}"
+    body = (
+        f"Dear {complaint.get('resident_name') or 'Citizen'},\n\n"
+        f"The status of your complaint has been updated.\n\n"
+        f"Complaint Title: {complaint['title']}\n"
+        f"Category: {complaint['category']}\n"
+        f"Location: {complaint.get('location') or 'Not provided'}\n"
+        f"New Status: {new_status}\n\n"
+        "You may log in to CivicTrack to view the latest complaint details.\n\n"
+        "Regards,\n"
+        "CivicTrack Notification Desk"
+    )
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
+    message["To"] = complaint["resident_email"]
+    message.set_content(body)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        server.starttls(context=context)
+        server.login(SMTP_USER, SMTP_PASSWORD)
+        server.send_message(message)
+
+    return True
 
 
 def ensure_local_database():
@@ -605,7 +671,17 @@ def admin_update_status(complaint_id):
     if status not in STATUS_OPTIONS:
         return redirect(url_for("admin"))
 
+    complaint = get_complaint_by_id(complaint_id)
+    previous_status = complaint["status"] if complaint else None
+
     update_complaint_status(complaint_id, status)
+
+    if complaint and previous_status != status:
+        try:
+            send_status_email(complaint, status)
+        except Exception:
+            pass
+
     return redirect(url_for("admin", category=request.args.get("category", "All")))
 
 
