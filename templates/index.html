@@ -11,8 +11,16 @@
             Citizens may submit complaints regarding roads, garbage collection, water supply, and electricity services, upload supporting photographs, and monitor the action taken status online.
         </p>
         <div class="hero-actions">
-            <a class="btn btn-primary" href="/register">Citizen Registration</a>
-            <a class="btn btn-secondary" href="/admin/login">Admin Login</a>
+            {% if session.get("role") == "user" %}
+                <a class="btn btn-primary" href="/dashboard">View My Complaints</a>
+                <a class="btn btn-secondary" href="/add">File New Complaint</a>
+            {% elif session.get("role") == "admin" %}
+                <a class="btn btn-primary" href="/admin">Open Admin Dashboard</a>
+                <a class="btn btn-secondary" href="/logout">Logout</a>
+            {% else %}
+                <a class="btn btn-primary" href="/register">Citizen Registration</a>
+                <a class="btn btn-secondary" href="/admin/login">Admin Login</a>
+            {% endif %}
         </div>
     </div>
     <div class="hero-panel">
@@ -39,5 +47,20 @@
             </div>
         </div>
     </div>
+</section>
+
+<section class="feature-grid slogan-grid">
+    <article class="feature-card slogan-card">
+        <h3>Report. Track. Resolve.</h3>
+        <p>A single portal for submitting civic issues and following action taken status clearly.</p>
+    </article>
+    <article class="feature-card slogan-card">
+        <h3>Transparent Civic Response</h3>
+        <p>Built to improve accountability across public grievance handling and service delivery.</p>
+    </article>
+    <article class="feature-card slogan-card">
+        <h3>Stronger Communities Through Better Reporting</h3>
+        <p>CivicTrack supports timely reporting, documented evidence, and faster administrative follow-up.</p>
+    </article>
 </section>
 {% endblock %}

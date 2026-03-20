@@ -355,6 +355,14 @@ p {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.slogan-grid {
+    margin-top: 22px;
+}
+
+.slogan-card {
+    background: #fbfcfe;
+}
+
 .feature-grid-four {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
